@@ -5,7 +5,7 @@
 
 const API = window.location.hostname === "localhost" || window.location.protocol === "file:"
   ? "http://localhost:5000/api"
-  : "https://suspension-sim-backend.onrender.com/api";
+  : "https://python-deploy-5twl.onrender.com/api";
 let linkCount = 2;
 let lastResult = null;
 let forceChart = null;
