@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SuspensionSim — Matrix Force Distribution</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== AUTH OVERLAY ===== -->
+  <div id="auth-overlay" class="auth-overlay">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="var(--accent)"/>
+          <path d="M8 20 L18 10 L32 20 L18 30 Z" stroke="white" stroke-width="2" fill="none"/>
+          <circle cx="18" cy="10" r="2.5" fill="white"/>
+          <circle cx="32" cy="20" r="2.5" fill="white"/>
+          <circle cx="18" cy="30" r="2.5" fill="white"/>
+          <circle cx="8" cy="20" r="2.5" fill="#fbbf24"/>
+        </svg>
+        <div>
+          <div class="auth-logo-title">SuspensionSim</div>
+          <div class="auth-logo-sub">Matrix Force Distribution</div>
+        </div>
+      </div>
+
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login-btn" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-signup-btn" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="login-form" class="auth-form" onsubmit="doLogin(event)">
+        <div class="auth-field">
+          <label>Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" required autocomplete="username" />
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="Enter password" required autocomplete="current-password" />
+        </div>
+        <div id="login-error" class="auth-error hidden"></div>
+        <button type="submit" class="auth-submit" id="login-btn">Sign In</button>
+        <p class="auth-switch">No account? <a href="#" onclick="switchAuthTab('signup')">Sign up free</a></p>
+      </form>
+
+      <!-- SIGNUP -->
+      <form id="signup-form" class="auth-form hidden" onsubmit="doSignup(event)">
+        <div class="auth-field">
+          <label>Username</label>
+          <input type="text" id="signup-username" placeholder="Choose a username" required autocomplete="username" />
+        </div>
+        <div class="auth-field">
+          <label>Email <span class="optional">(optional)</span></label>
+          <input type="email" id="signup-email" placeholder="your@email.com" autocomplete="email" />
+        </div>
+        <div class="auth-field">
+          <label>Password</label>
+          <input type="password" id="signup-password" placeholder="Min 6 characters" required autocomplete="new-password" />
+        </div>
+        <div id="signup-error" class="auth-error hidden"></div>
+        <button type="submit" class="auth-submit" id="signup-btn">Create Account</button>
+        <p class="auth-switch">Have an account? <a href="#" onclick="switchAuthTab('login')">Sign in</a></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="app" class="hidden">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="10" fill="var(--accent)"/>
+            <path d="M8 20 L18 10 L32 20 L18 30 Z" stroke="white" stroke-width="2" fill="none"/>
+            <circle cx="18" cy="10" r="2.5" fill="white"/>
+            <circle cx="32" cy="20" r="2.5" fill="white"/>
+            <circle cx="18" cy="30" r="2.5" fill="white"/>
+            <circle cx="8" cy="20" r="2.5" fill="#fbbf24"/>
+          </svg>
+          <div>
+            <div class="logo-title">SuspensionSim</div>
+            <div class="logo-sub">Matrix Force Distribution</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-btn active" onclick="showTab('builder')">⚙️ Builder</button>
+          <button class="nav-btn" onclick="showTab('results')">📊 Results</button>
+          <button class="nav-btn" onclick="showTab('history')">� History</button>
+        </nav>
+
+        <div class="header-right">
+          <!-- Theme Toggle -->
+          <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="theme-btn">🌙</button>
+          <!-- User -->
+          <div class="user-pill">
+            <span class="user-avatar" id="user-avatar">U</span>
+            <span id="user-name-display">User</span>
+          </div>
+          <button class="btn-logout" onclick="logout()">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="main">
+
+      <!-- ===== BUILDER TAB ===== -->
+      <div id="tab-builder" class="tab active">
+        <div class="page-title">
+          <h1>Suspension Builder</h1>
+          <p>Configure multi-link geometry and apply an external force to compute distribution via A·T = F</p>
+        </div>
+
+        <div class="builder-grid">
+          <section class="card">
+            <div class="card-header">
+              <span class="card-icon">⚙️</span>
+              <div><h2>Link Configuration</h2><p>Define each link by angle θ and length</p></div>
+            </div>
+            <div class="field-row">
+              <label>Number of Links</label>
+              <div class="stepper">
+                <button onclick="changeLinks(-1)">−</button>
+                <span id="link-count">2</span>
+                <button onclick="changeLinks(1)">+</button>
+              </div>
+            </div>
+            <div id="links-container"></div>
+            <div class="preset-row">
+              <span class="label-sm">Presets:</span>
+              <button class="preset-btn" onclick="loadPreset('double_wishbone')">Double Wishbone</button>
+              <button class="preset-btn" onclick="loadPreset('macpherson')">MacPherson</button>
+              <button class="preset-btn" onclick="loadPreset('multilink')">Multi-Link</button>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-header">
+              <span class="card-icon">⚡</span>
+              <div><h2>Force Input Panel</h2><p>Set external load magnitude and type</p></div>
+            </div>
+            <div class="field-group">
+              <label>External Force Magnitude (N)</label>
+              <input type="number" id="force-magnitude" value="1000" min="1" max="100000" />
+            </div>
+            <div class="field-group">
+              <label>Force Type</label>
+              <div class="force-type-grid">
+                <label class="force-card active" id="ft-bump">
+                  <input type="radio" name="force_type" value="bump" checked onchange="selectForceType(this)" />
+                  <span class="ft-icon">🚗</span>
+                  <span class="ft-name">Bump</span>
+                  <span class="ft-desc">Vertical (Fy)</span>
+                </label>
+                <label class="force-card" id="ft-braking">
+                  <input type="radio" name="force_type" value="braking" onchange="selectForceType(this)" />
+                  <span class="ft-icon">🛑</span>
+                  <span class="ft-name">Braking</span>
+                  <span class="ft-desc">Horizontal (Fx)</span>
+                </label>
+                <label class="force-card" id="ft-cornering">
+                  <input type="radio" name="force_type" value="cornering" onchange="selectForceType(this)" />
+                  <span class="ft-icon">↩️</span>
+                  <span class="ft-name">Cornering</span>
+                  <span class="ft-desc">45° Split</span>
+                </label>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="runSimulation()">
+              <span id="sim-btn-text">▶ Run Simulation</span>
+            </button>
+            <div id="sim-error" class="error-msg hidden"></div>
+          </section>
+        </div>
+
+        <section class="card mt-4">
+          <div class="card-header">
+            <span class="card-icon">�</span>
+            <div><h2>2D Suspension Diagram</h2><p>Live link orientation preview — Direction Cosine visualization</p></div>
+          </div>
+          <canvas id="suspension-canvas" width="800" height="280"></canvas>
+        </section>
+      </div>
+
+      <!-- ===== RESULTS TAB ===== -->
+      <div id="tab-results" class="tab">
+        <div id="no-results" class="empty-state">
+          <div class="empty-icon">📊</div>
+          <h2>No simulation yet</h2>
+          <p>Run a simulation from the Builder tab to see results here.</p>
+          <button class="btn-secondary" onclick="showTab('builder')">Go to Builder</button>
+        </div>
+        <div id="results-content" class="hidden">
+          <div class="page-title results-header">
+            <div>
+              <h1>Simulation Results</h1>
+              <p id="result-subtitle">Force distribution via A·T = F</p>
+            </div>
+            <button class="btn-pdf" onclick="downloadPDF()">📄 Export PDF Report</button>
+          </div>
+          <div class="summary-grid" id="summary-cards"></div>
+          <section class="card mt-4">
+            <div class="card-header">
+              <span class="card-icon">🔢</span>
+              <div><h2>Direction Cosine Matrix (A)</h2><p>Static Equilibrium: A·T = F</p></div>
+            </div>
+            <div id="matrix-display" class="matrix-wrap"></div>
+          </section>
+          <div class="results-grid mt-4">
+            <section class="card">
+              <div class="card-header">
+                <span class="card-icon">📊</span>
+                <div><h2>Force Distribution Chart</h2><p>Force per link (N)</p></div>
+              </div>
+              <div class="chart-wrap"><canvas id="force-chart"></canvas></div>
+            </section>
+            <section class="card">
+              <div class="card-header">
+                <span class="card-icon">📋</span>
+                <div><h2>Results Table</h2><p>T = A⁻¹·F — Link forces</p></div>
+              </div>
+              <div class="table-wrap">
+                <table id="results-table">
+                  <thead><tr><th>Link</th><th>Angle (°)</th><th>Length (mm)</th><th>Force T (N)</th><th>Status</th></tr></thead>
+                  <tbody id="results-tbody"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== HISTORY TAB ===== -->
+      <div id="tab-history" class="tab">
+        <div class="page-title">
+          <h1>Simulation History</h1>
+          <p id="history-subtitle">Your past simulations stored in MongoDB</p>
+        </div>
+        <div class="history-toolbar">
+          <button class="btn-secondary" onclick="loadHistory()">🔄 Refresh</button>
+        </div>
+        <div id="history-list" class="history-list"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ===== AI CHATBOT ===== -->
+  <div id="chatbot-bubble" class="hidden" onclick="toggleChat()">💬</div>
+  <div id="chatbot-panel" class="chatbot-panel hidden">
+    <div class="chat-header">
+      <div class="chat-title">
+        <span>🤖</span>
+        <div>
+          <div class="chat-name">Engineering AI</div>
+          <div class="chat-status">Suspension & Matrix Expert</div>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div id="chat-messages" class="chat-messages">
+      <div class="chat-msg bot">
+        <div class="msg-bubble">Hi! I'm your suspension engineering assistant. Ask me about force distribution, the Direction Cosine Matrix, or how to interpret your simulation results.</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Ask about suspension mechanics..." onkeydown="if(event.key==='Enter') sendChat()" />
+      <button onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
