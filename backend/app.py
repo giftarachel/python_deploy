@@ -23,8 +23,11 @@ app.register_blueprint(pdf_bp, url_prefix="/api")
 app.register_blueprint(chat_bp, url_prefix="/api")
 app.register_blueprint(auth_bp, url_prefix="/api")
 
+@app.route("/")
+def health():
+    return {"status": "ok", "service": "SuspensionSim API"}, 200
+
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 5000))
-    debug = os.environ.get("FLASK_ENV") != "production"
-    app.run(debug=debug, host="0.0.0.0", port=port)
+    app.run(debug=False, host="0.0.0.0", port=port)

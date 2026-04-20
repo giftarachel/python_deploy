@@ -28,10 +28,13 @@ If asked about simulation results, help interpret the force distribution data.""
 def chat():
     data = request.get_json()
     user_message = data.get("message", "").strip()
-    context = data.get("context", "")  # optional simulation context
+    context = data.get("context", "")
 
     if not user_message:
         return jsonify({"error": "Message is required"}), 400
+
+    if not GROQ_API_KEY:
+        return jsonify({"error": "AI chatbot is not configured. Please set GROQ_API_KEY in environment variables."}), 503
 
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 
