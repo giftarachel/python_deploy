@@ -23,6 +23,17 @@
       transform: translateY(-2px) scale(1.04);
       box-shadow: 0 8px 28px rgba(224,64,251,0.55);
     }
+    .calc-nav-btn {
+      background: linear-gradient(135deg, #e040fb, #aa00cc);
+      color: white; text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 14px; border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      box-shadow: 0 2px 12px rgba(224,64,251,0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      white-space: nowrap;
+    }
+    .calc-nav-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(224,64,251,0.5); }
   </style>
 </head>
 <body>
@@ -117,6 +128,8 @@
         <div class="header-right">
           <!-- Theme Toggle -->
           <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" id="theme-btn">🌙</button>
+          <!-- Calculator shortcut -->
+          <a href="calculator.html" class="calc-nav-btn" title="Open Calculator">🧮 Calculate</a>
           <!-- User -->
           <div class="user-pill">
             <span class="user-avatar" id="user-avatar">U</span>
